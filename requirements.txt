@@ -1,4 +1,4 @@
 streamlit
-tensorflow-cpu>=2.16.1
+onnxruntime
 pillow
 numpy
