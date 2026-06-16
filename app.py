@@ -40,8 +40,8 @@ if uploaded_file is not None:
         # 2. Resize to the exact dimension the model expects
         img = img.resize((224, 224))
         
-        # 3. Process into float32 array and add batch dimension
-        img_array = np.array(img, dtype=np.float32)
+        # 3. Process into float32 array, normalize pixels to [0, 1], and add batch dimension
+        img_array = np.array(img, dtype=np.float32) / 255.0
         img_array = np.expand_dims(img_array, axis=0) # Shape: (1, 224, 224, 3)
         
         # 4. Run inference using ONNX runtime
