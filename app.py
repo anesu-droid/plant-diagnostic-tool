@@ -40,22 +40,18 @@ if uploaded_file is not None:
         # 2. Resize to the exact dimension the model expects
         img = img.resize((224, 224))
         
-        # 3. Process into float32 array, normalize pixels to [0, 1], and add batch dimension
-        img_array = np.array(img, dtype=np.float32) / 255.0
+        # 3. Process into float32 array and add batch dimension (NO manual division here!)
+        img_array = np.array(img, dtype=np.float32)
         img_array = np.expand_dims(img_array, axis=0) # Shape: (1, 224, 224, 3)
         
         # 4. Run inference using ONNX runtime
-        raw_preds = session.run(None, {input_name: img_array})[0]
+        probabilities = session.run(None, {input_name: img_array})[0]
         
-        # 5. Apply manual softmax over the raw logits
-        exp_preds = np.exp(raw_preds - np.max(raw_preds))
-        probabilities = exp_preds / exp_preds.sum(axis=1, keepdims=True)
-        
-        # 6. Extract predictions
+        # 5. Extract predictions directly (since the model output is already post-softmax probabilities)
         class_idx = np.argmax(probabilities[0])
         predicted_class = CLASS_NAMES[class_idx]
-        confidence = 100 * np.max(probabilities[0])
-    
+        confidence = 100 * probabilities[0][class_idx]
+        
     # Format the folder structure name to look beautiful on the UI
     clean_display_name = predicted_class.replace("___", " - ").replace("_", " ")
     
