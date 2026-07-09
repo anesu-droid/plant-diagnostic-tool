@@ -13,8 +13,6 @@ def load_onnx_session():
 
 session = load_onnx_session()
 input_name = session.get_inputs()[0].name
-
-# Updated 38-class PlantVillage Diagnostic Matrix
 CLASS_NAMES = [
     'Apple___Apple_scab', 'Apple___Black_rot', 'Apple___Cedar_apple_rust', 'Apple___healthy',
     'Blueberry___healthy', 'Cherry___Powdery_mildew', 'Cherry___healthy', 
@@ -35,24 +33,20 @@ if uploaded_file is not None:
     st.image(image, caption="Uploaded Sample", use_container_width=True)
     
     with st.spinner("Analyzing structural markers..."):
-        # 1. Force convert to RGB (handles transparency channels in PNGs safely)
+        
         img = image.convert("RGB")
-        # 2. Resize to the exact dimension the model expects
         img = img.resize((224, 224))
         
-        # 3. Process into float32 array and add batch dimension (NO manual division here!)
         img_array = np.array(img, dtype=np.float32)
         img_array = np.expand_dims(img_array, axis=0) # Shape: (1, 224, 224, 3)
         
-        # 4. Run inference using ONNX runtime
         probabilities = session.run(None, {input_name: img_array})[0]
         
-        # 5. Extract predictions directly (since the model output is already post-softmax probabilities)
         class_idx = np.argmax(probabilities[0])
         predicted_class = CLASS_NAMES[class_idx]
         confidence = 100 * probabilities[0][class_idx]
         
-    # Format the folder structure name to look beautiful on the UI
+    
     clean_display_name = predicted_class.replace("___", " - ").replace("_", " ")
     
     st.success(f"Analysis Complete!")
